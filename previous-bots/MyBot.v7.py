@@ -13,8 +13,7 @@ import logging
 # This game object contains the initial game state.
 game = hlt.Game()
 
-# version = sys.argv[0].split(".")[1]
-version = "v5"
+version = sys.argv[0].split(".")[1]
 game.ready("Pink Bot {}".format(version))
 
 ship_states = {}
@@ -42,33 +41,61 @@ while True:
         position_dict = {}
         halite_dict = {}
 
+        # logging.info("{} {}".format(ship.position, me.shipyard.position))
+
         for n, direction in enumerate(direction_order):
             position_dict[direction] = position_options[n]
 
         for direction in position_dict:
             position = position_dict[direction]
             halite_amount = game_map[position].halite_amount
+
             if position_dict[direction] not in position_choices:
                 if direction == Direction.Still:
                     halite_dict[direction] = halite_amount * 3
                 else:
                     halite_dict[direction] = halite_amount
+            # else:
+            #     logging.info("\t\n{} \t\n{} \n".format(position_dict[direction], halite_dict))
 
-        if ship_states[ship.id] == "depositing":
-            move = game_map.naive_navigate(ship, me.shipyard.position)
+
+        if ship_states[ship.id] == "depositing":           
+            diff = ship.position - me.shipyard.position
+
+            if diff.x > 0 and position_dict[Direction.West] not in position_choices:
+                move = Direction.West
+            elif diff.x < 0 and position_dict[Direction.East] not in position_choices:
+                move = Direction.East
+            elif diff.y > 0 and position_dict[Direction.North] not in position_choices:
+                move = Direction.North
+            elif diff.y < 0 and position_dict[Direction.South] not in position_choices:
+                move = Direction.South
+            else:
+                move = Direction.Still           
+
+            if position_dict[move] in position_choices:
+                logging.info("return \n{} \n{} \n{}".format(halite_dict, move, game_map.naive_navigate(ship, me.shipyard.position)))
+
             position_choices.append(position_dict[move])
             command_queue.append(ship.move(move))
 
-            if move == Direction.Still:
+            if move == Direction.Still and diff.x == 0 and diff.y == 0:
                 ship_states[ship.id] = "collecting"
-
         elif ship_states[ship.id] == "collecting":
-            directional_choice = max(halite_dict, key=halite_dict.get)
-            position_choices.append(position_dict[directional_choice])
-            command_queue.append(ship.move(game_map.naive_navigate(ship, position_dict[directional_choice])))
+            move = max(halite_dict, key=halite_dict.get)
 
-            if ship.halite_amount > constants.MAX_HALITE / 3:
+            logging.info(move)
+
+            if position_dict[move] in position_choices:
+                logging.info("collect \nhalite: {} \nmove: {} \nclaimed positions: {} \ncurrent possible moves: {} \n".format(halite_dict, position_dict[move], position_choices, position_dict))
+
+            position_choices.append(position_dict[move])
+            command_queue.append(ship.move(move))
+
+            if ship.halite_amount > constants.MAX_HALITE / 2:
                 ship_states[ship.id] = "depositing"
+            
+    # logging.info(position_choices)
 
     if game.turn_number <= 200 and me.halite_amount >= constants.SHIP_COST and not game_map[me.shipyard].is_occupied:
         command_queue.append(me.shipyard.spawn())

@@ -4,7 +4,6 @@ from . import commands, constants
 from .positionals import Direction, Position
 from .common import read_input
 
-
 class Entity(abc.ABC):
     """
     Base Entity Class from whence Ships, Dropoffs and Shipyards inherit
@@ -29,13 +28,11 @@ class Entity(abc.ABC):
                                       self.id,
                                       self.position)
 
-
 class Dropoff(Entity):
     """
     Dropoff class for housing dropoffs
     """
     pass
-
 
 class Shipyard(Entity):
     """
@@ -53,6 +50,9 @@ class Ship(Entity):
     def __init__(self, owner, id, position, halite_amount):
         super().__init__(owner, id, position)
         self.halite_amount = halite_amount
+        self.safe_moves = {}
+        self.current_move = None
+        self.moved = False
 
     @property
     def is_full(self):
@@ -73,11 +73,45 @@ class Ship(Entity):
             raw_direction = Direction.convert(direction)
         return "{} {} {}".format(commands.MOVE, self.id, raw_direction)
 
+    def set_moved(self, moved):
+        self.moved = moved
+
+    def get_current_move(self):
+        return self.current_move
+
+    def set_current_move(self, move):
+        self.current_move = move
+
     def stay_still(self):
         """
         Don't move this ship.
         """
         return "{} {} {}".format(commands.MOVE, self.id, commands.STAY_STILL)
+
+    def get_safe_moves(self):
+        """
+        Returns possible safe moves of this ship
+        """
+        return self.safe_moves
+
+    def delete_safe_move(self, key):
+        """
+        Deletes a safe move
+        """
+        if key in self.safe_moves:
+            del self.safe_moves[key]
+
+    def pick_best_move(self):
+        if bool(self.safe_moves) == False:
+            return None
+        else:
+            return max(self.safe_moves, key=self.safe_moves.get)
+
+    def set_safe_moves(self, moves):
+        """
+        Returns possible safe moves of this ship
+        """
+        self.safe_moves = moves
 
     @staticmethod
     def _generate(player_id):
@@ -90,7 +124,8 @@ class Ship(Entity):
         return ship_id, Ship(player_id, ship_id, Position(x_position, y_position), halite)
 
     def __repr__(self):
-        return "{}(id={}, {}, cargo={} halite)".format(self.__class__.__name__,
+        return "{}(id={}, {}, cargo={} halite, moved={})".format(self.__class__.__name__,
                                                        self.id,
                                                        self.position,
-                                                       self.halite_amount)
+                                                       self.halite_amount,
+                                                       self.moved)

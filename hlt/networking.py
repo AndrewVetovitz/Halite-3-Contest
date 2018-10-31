@@ -60,7 +60,10 @@ class Game:
         # Mark cells with ships as unsafe for navigation
         for player in self.players.values():
             for ship in player.get_ships():
-                self.game_map[ship.position].mark_unsafe(ship)
+                if player == self.me:
+                    self.game_map[ship.position].mark_ally()             
+                else:
+                    self.game_map[ship.position].mark_enemy()
 
             self.game_map[player.shipyard.position].structure = player.shipyard
             for dropoff in player.get_dropoffs():

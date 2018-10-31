@@ -6,7 +6,6 @@ from .player import Player
 from .positionals import Direction, Position
 from .common import read_input
 
-
 class MapCell:
     """A cell on the game map."""
     def __init__(self, position, halite_amount):
@@ -14,6 +13,9 @@ class MapCell:
         self.halite_amount = halite_amount
         self.ship = None
         self.structure = None
+        self.ally = False
+        self.enemy = False
+        self.safe = True
 
     @property
     def is_empty(self):
@@ -30,6 +32,27 @@ class MapCell:
         return self.ship is not None
 
     @property
+    def is_safe(self):
+        """
+        :return: Whether this cell is safe to move
+        """
+        return self.safe
+
+    @property
+    def is_enemy(self):
+        """
+        :return: Wheather this cell is an enemy
+        """
+        return self.enemy
+
+    @property
+    def is_ally(self):
+        """
+        :return: Wheather this cell is an ally
+        """
+        return self.ally
+
+    @property
     def has_structure(self):
         """
         :return: Whether this cell has any structures
@@ -43,13 +66,41 @@ class MapCell:
         """
         return None if not self.structure else type(self.structure)
 
+    def mark_safe(self):
+        """
+        Mark this cell as safe for navigation.
+        """
+        self.safe = True
+
     def mark_unsafe(self, ship):
         """
         Mark this cell as unsafe (occupied) for navigation.
 
         Use in conjunction with GameMap.naive_navigate.
         """
+        self.safe = False
         self.ship = ship
+
+    def mark_ally(self):
+        """
+        Mark this cell as an ally
+        """
+        self.ally = True
+
+    def mark_enemy(self):
+        """
+        Mark this cell as enemy
+
+        Use in conjunction with GameMap.naive_navigate.
+        """
+        self.enemy = True
+        self.safe = False
+
+    def get_ship(self):
+        """
+        Return ship in specific tile
+        """
+        return self.ship
 
     def __eq__(self, other):
         return self.position == other.position
@@ -189,6 +240,9 @@ class GameMap:
         for y in range(self.height):
             for x in range(self.width):
                 self[Position(x, y)].ship = None
+                self[Position(x, y)].safe = True
+                self[Position(x, y)].ally = False
+                self[Position(x, y)].enemy = False
 
         for _ in range(int(read_input())):
             cell_x, cell_y, cell_energy = map(int, read_input().split())
