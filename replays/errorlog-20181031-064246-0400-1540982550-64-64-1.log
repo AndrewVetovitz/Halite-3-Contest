@@ -1,0 +1,113 @@
+
+Turn 251
+================================================================
+warning: owned entities 4, 26 collided on cell (47, 34) as the result of moves on this turn
+At command 1 of 29:
+>>> 1   m 4 n
+    2   m 6 s
+    3   m 12 s
+
+Other commands that placed an entity on this cell:
+    3   m 12 s
+    4   m 16 s
+>>> 5   m 26 s
+    6   m 49 o
+    7   m 50 n
+
+
+Turn 495
+================================================================
+warning: owned entities 6, 32 collided on cell (47, 35) as the result of moves on this turn
+At command 7 of 27:
+    5   m 0 e
+    6   m 2 n
+>>> 7   m 6 e
+    8   m 8 n
+    9   m 10 n
+
+Other commands that placed an entity on this cell:
+    15   m 24 e
+    16   m 31 n
+>>> 17   m 32 n
+    18   m 37 n
+    19   m 40 n
+
+
+Turn 498
+================================================================
+warning: owned entities 0, 18, 20, 24, 53 collided on cell (47, 32) as the result of moves on this turn
+At command 1 of 25:
+>>> 1   m 0 s
+    2   m 2 n
+    3   m 8 n
+
+Other commands that placed an entity on this cell:
+    6   m 12 n
+    7   m 16 n
+>>> 8   m 18 w
+    9   m 20 n
+    10   m 22 n
+
+    7   m 16 n
+    8   m 18 w
+>>> 9   m 20 n
+    10   m 22 n
+    11   m 23 w
+
+    10   m 22 n
+    11   m 23 w
+>>> 12   m 24 e
+    13   m 31 n
+    14   m 35 n
+
+
+Turn 499
+================================================================
+warning: owned entities 35, 11, 12, 51 collided on cell (47, 32) as the result of moves on this turn
+At command 3 of 20:
+    1   m 8 o
+    2   m 2 n
+>>> 3   m 35 w
+    4   m 37 e
+    5   m 41 e
+
+Other commands that placed an entity on this cell:
+    5   m 41 e
+    6   m 10 o
+>>> 7   m 11 n
+    8   m 12 e
+    9   m 46 w
+
+    6   m 10 o
+    7   m 11 n
+>>> 8   m 12 e
+    9   m 46 w
+    10   m 43 w
+
+    12   m 49 e
+    13   m 50 n
+>>> 14   m 51 s
+    15   m 40 e
+    16   m 22 o
+
+
+Turn 500
+================================================================
+warning: owned entities 2, 43, 40 collided on cell (47, 32) as the result of moves on this turn
+At command 1 of 16:
+>>> 1   m 2 n
+    2   m 37 n
+    3   m 8 n
+
+Other commands that placed an entity on this cell:
+    4   m 41 e
+    5   m 10 n
+>>> 6   m 43 w
+    7   m 46 w
+    8   m 47 e
+
+    13   m 22 w
+    14   m 23 n
+>>> 15   m 40 e
+    16   m 31 n
+

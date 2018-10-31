@@ -18,6 +18,7 @@ game.ready("Pink Bot {}".format(version))
 
 ship_states = {}
 max_spawn_turn = 200
+end_moves_offset = 10
 # max_spawn_turn = constants.MAX_TURNS - 200
 
 # logging.info("max spawns: {}\n".format(max_spawn_turn))
@@ -50,44 +51,42 @@ while True:
             ship.set_current_move(Direction.Still)
             ship.set_moved(True)
             game_map[ship.position].mark_unsafe(ship)
-            command_queue.append(ship.move(Direction.Still))
 
     for ship in me.get_ships():
         if ship.moved == True:
             continue
 
         # Moving all depositors back to base
-        position_options = ship.position.get_surrounding_cardinals() + [ship.position]
+        if ship_states[ship.id] == "depositing": 
+            position_options = ship.position.get_surrounding_cardinals() + [ship.position]
 
-        position_dict = {}
+            position_dict = {}
+            move_dict = {}
 
-        for n, direction in enumerate(direction_order):
-            position_dict[direction] = position_options[n]
+            for n, direction in enumerate(direction_order):
+                position_dict[direction] = position_options[n]
 
-        if ship_states[ship.id] == "depositing":           
-            moves = game_map.get_unsafe_moves(ship.position, me.shipyard.position)
-            moves.append(Direction.Still)
-            moves.append(Direction.invert(moves[0]))
-            moves.append(Direction.invert(moves[1]))
+            for direction in position_dict:
+                position = position_dict[direction]
+                distance = game_map.calculate_distance(position, me.shipyard.position)
 
-            for potential_move in moves:
-                position = position_dict[potential_move]
+                if game_map[position].is_safe == True and (game_map[position].is_enemy == False or position == me.shipyard.position):
+                    move_dict[direction] = distance + game_map[position].halite_amount / 1000
 
-                if game_map[position].is_safe == True:
-                    move = potential_move
-                    break
-
+            move = min(move_dict, key=move_dict.get)
             position = position_dict[move]
+
+            if game_map[position].is_safe == False:
+                logging.info("depositing unsafe needs to move id={} move={}".format(ship.id, move))
 
             ship.set_current_move(move)
             ship.set_moved(True)
             game_map[position].mark_unsafe(ship)
-            command_queue.append(ship.move(move))
 
-            if move == Direction.Still and game_map.calculate_distance(ship.position, me.shipyard.position) == 0:
+            if game_map.calculate_distance(ship.position, me.shipyard.position) == 0:
                 ship_states[ship.id] = "collecting"
 
-            if game_map.calculate_distance(position_dict[move], me.shipyard.position) + 3 >= constants.MAX_TURNS - game.turn_number:
+            if game_map.calculate_distance(position_dict[move], me.shipyard.position) + end_moves_offset >= constants.MAX_TURNS - game.turn_number:
                 ship_states[ship.id] = "end"
 
     for ship in me.get_ships():
@@ -95,46 +94,45 @@ while True:
             continue
 
         # Moving all collectors
-        position_options = ship.position.get_surrounding_cardinals() + [ship.position]
-
-        position_dict = {}
-        halite_dict = {}
-
-        for n, direction in enumerate(direction_order):
-            position_dict[direction] = position_options[n]
-
-        for direction in position_dict:
-            position = position_dict[direction]
-            halite_amount = game_map[position].halite_amount
-
-            if game_map[position].is_enemy == False and game_map[position].is_safe == True:
-                if direction == Direction.Still:
-                    halite_dict[direction] = halite_amount * 3
-                else:
-                    halite_dict[direction] = halite_amount
-
-        ship.set_safe_moves(halite_dict)
-
         if ship_states[ship.id] == "collecting":
+            position_options = ship.position.get_surrounding_cardinals() + [ship.position]
+
+            position_dict = {}
+            halite_dict = {}
+
+            for n, direction in enumerate(direction_order):
+                position_dict[direction] = position_options[n]
+
+            for direction in position_dict:
+                position = position_dict[direction]
+                halite_amount = game_map[position].halite_amount
+
+                if game_map[position].is_enemy == False and game_map[position].is_safe == True:
+                    if direction == Direction.Still:
+                        halite_dict[direction] = halite_amount * 3
+                    else:
+                        halite_dict[direction] = halite_amount
+
+            ship.set_safe_moves(halite_dict)
+
             move = ship.pick_best_move()
 
             if move == None:
                 move = Direction.Still
 
-            if game_map[position].is_safe == False:
-                logging.info("unsafe needs to move")
-        
             position = position_dict[move]
+
+            if game_map[position].is_safe == False:
+                logging.info("collecting unsafe needs to move id={} move={}".format(ship.id, move))
 
             ship.set_current_move(move)
             ship.set_moved(True)
             game_map[position].mark_unsafe(ship)
-            command_queue.append(ship.move(move))
 
-            if ship.halite_amount > constants.MAX_HALITE * .75:
+            if ship.halite_amount == constants.MAX_HALITE:
                 ship_states[ship.id] = "depositing"
 
-            if game_map.calculate_distance(position_dict[move], game_map[me.shipyard].position) + 2 >= constants.MAX_TURNS - game.turn_number:
+            if game_map.calculate_distance(position_dict[move], me.shipyard.position) + end_moves_offset >= constants.MAX_TURNS - game.turn_number:
                 ship_states[ship.id] = "end"
 
     for ship in me.get_ships():
@@ -142,35 +140,58 @@ while True:
             continue
 
         # Moving all end
-        position_options = ship.position.get_surrounding_cardinals() + [ship.position]
-
-        position_dict = {}
-
-        for n, direction in enumerate(direction_order):
-            position_dict[direction] = position_options[n]
-
         if ship_states[ship.id] == "end":
-            moves = game_map.get_unsafe_moves(ship.position, me.shipyard.position)
-            moves.append(Direction.Still)
-            moves.append(Direction.invert(moves[0]))
-            moves.append(Direction.invert(moves[1]))
+            position_options = ship.position.get_surrounding_cardinals() + [ship.position]
 
-            distance = game_map.calculate_distance(ship.position, me.shipyard.position)
+            position_dict = {}
+            move_dict = {}
 
-            for potential_move in moves:
-                position = position_dict[potential_move]
+            for n, direction in enumerate(direction_order):
+                position_dict[direction] = position_options[n]
 
-                if game_map[position].is_occupied == False or distance == 1:
-                    move = potential_move
-                    break
+            for direction in position_dict:
+                position = position_dict[direction]
+                distance = game_map.calculate_distance(position, me.shipyard.position)
 
-            if distance > 1:
-                position = position_dict[move]
+                if distance == 0 or (game_map[position].is_enemy == False and game_map[position].is_safe == True):
+                    move_dict[direction] = distance
+
+            if bool(move_dict) == True:
+                move = min(move_dict, key=move_dict.get)
+            else:
+                move = Direction.Still
+            
+            position = position_dict[move]
+            dist = game_map.calculate_distance(position, me.shipyard.position)
+
+            if game_map[position].is_safe == False:
+                logging.info("end unsafe move id={} move={}".format(ship.id, move))
+                # copy_pos = position
+
+                # contender = game_map[copy_pos].ship
+
+                # while contender is not None:
+                #     contender.set_current_move(Direction.Still)
+                #     copy_pos = contender.position
+                #     contender_next = game_map[copy_pos].ship
+                #     game_map[copy_pos].mark_unsafe(contender)
+                #     contender = contender_next
+
+            if dist > 0:
                 game_map[position].mark_unsafe(ship)
             
             ship.set_moved(True)
             ship.set_current_move(move)
-            command_queue.append(ship.move(move))
+
+    for ship in me.get_ships():
+        # Puts ship moves into command queue
+        if ship.moved == False:
+            logging.info("Ship issued no move order id={}".format(ship.id))
+            ship.set_current_move(Direction.Still)
+
+        move = ship.current_move
+
+        command_queue.append(ship.move(move))
 
     if game.turn_number <= max_spawn_turn and me.halite_amount >= constants.SHIP_COST and not game_map[me.shipyard].is_ally and game_map[me.shipyard].is_safe:
         game_map[me.shipyard.position].mark_unsafe(None)

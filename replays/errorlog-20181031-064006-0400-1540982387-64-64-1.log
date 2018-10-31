@@ -1,0 +1,78 @@
+
+Turn 498
+================================================================
+warning: owned entities 0, 2, 8, 11 collided on cell (47, 32) as the result of moves on this turn
+At command 1 of 12:
+>>> 1   m 0 n
+    2   m 2 e
+    3   m 4 n
+
+Other commands that placed an entity on this cell:
+    1   m 0 n
+>>> 2   m 2 e
+    3   m 4 n
+    4   m 6 n
+
+    3   m 4 n
+    4   m 6 n
+>>> 5   m 8 s
+    6   m 10 n
+    7   m 11 w
+
+    5   m 8 s
+    6   m 10 n
+>>> 7   m 11 w
+    8   m 15 s
+    9   m 16 o
+
+
+Turn 499
+================================================================
+warning: owned entities 4, 6, 10, 15 collided on cell (47, 32) as the result of moves on this turn
+At command 3 of 8:
+    1   m 16 w
+    2   m 17 e
+>>> 3   m 4 n
+    4   m 6 w
+    5   m 24 w
+
+Other commands that placed an entity on this cell:
+    2   m 17 e
+    3   m 4 n
+>>> 4   m 6 w
+    5   m 24 w
+    6   m 20 e
+
+    5   m 24 w
+    6   m 20 e
+>>> 7   m 10 e
+    8   m 15 s
+
+    6   m 20 e
+    7   m 10 e
+>>> 8   m 15 s
+
+
+Turn 500
+================================================================
+warning: owned entities 16, 17, 20, 24 collided on cell (47, 32) as the result of moves on this turn
+At command 1 of 4:
+>>> 1   m 16 w
+    2   m 17 e
+    3   m 20 s
+
+Other commands that placed an entity on this cell:
+    1   m 16 w
+>>> 2   m 17 e
+    3   m 20 s
+    4   m 24 n
+
+    1   m 16 w
+    2   m 17 e
+>>> 3   m 20 s
+    4   m 24 n
+
+    2   m 17 e
+    3   m 20 s
+>>> 4   m 24 n
+
